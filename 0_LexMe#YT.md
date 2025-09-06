@@ -1,0 +1,44 @@
+Source:
+https://youtu.be/Q4rXmxQ1AUM?si=D2WKW0EBom5bUl1M
+
+
+This video provides a comprehensive guide on building a full-stack SaaS (Software as a Service) application using Next.js for the frontend and Supabase for the backend. The application features include task management with automatic AI labeling, image attachments using cloud storage, Google OAuth and email authentication, and premium subscriptions integrated with Stripe. [0:07, 1:56, 2:50]
+
+Key Concepts and Technologies Used:
+
+Frontend: Next.js (a static web app) [0:06, 4:02]
+
+Backend (Supabase):
+
+Authentication: For user sign-ups and logins, including Google OAuth integration. [0:08, 3:34, 3:54]
+
+PostgreSQL Database: A relational database for storing application data. [0:08, 3:40]
+
+Storage: Similar to Amazon S3 or Firebase, for handling image attachments. [0:08, 3:42]
+
+Edge Functions: Server-side logic written in TypeScript, deployed without managing servers. [0:08, 3:48]
+
+Third-Party Integrations:
+
+Google OAuth: For Google sign-in functionality. [0:08, 4:13]
+
+OpenAI API: Used for the AI task labeling feature. [0:08, 4:18]
+
+Stripe: For processing payments and managing subscriptions. [0:08, 4:25]
+
+----------
+----------
+
+The project is designed to be an ideal starting point for developers looking to quickly build and launch a SaaS application. [0:10] The setup process involves:
+
+Downloading the project code from the provided GitHub repository [1:50, 5:20].
+
+Creating a Supabase project on the Supabase cloud platform [5:24, 8:07].
+
+Setting up external dependencies, including Google OAuth, OpenAI API, and Stripe, and configuring their respective API keys and secrets [5:27, 11:53, 14:38, 15:32].
+
+Setting up the database and storage within Supabase, including creating tables for user profiles, tasks, and usage tracking, along with security policies (Row Level Security) and SQL triggers [22:18, 23:18, 23:36, 24:00].
+
+Setting up and deploying Edge Functions for backend logic, including functions for creating tasks with AI, creating Stripe checkout sessions, and handling Stripe webhooks [28:54, 29:08].
+
+The video specifies that it assumes the viewer is at least a mid-level developer and has some familiarity with Node.js, NPM, Next.js, and SQL databases. [2:30] All necessary links for the project, including the GitHub repository, are available in the video description. [1:50, 5:48]
