@@ -140,6 +140,14 @@ select 'stripe', 'sk_test_xxx'
 returning key_id;
 ```
 
+or by updating it:
+
+```sql
+update vault.secrets
+    set secret = 'your-new-stripe-secret-key'
+    where name = 'stripe'
+    returning key_id;
+```
 ### Required Environment Variables
 
 Add to `.env.local` and `.env.test.local`:
