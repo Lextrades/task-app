@@ -132,22 +132,18 @@ stripe billing_portal configurations create \
    - Endpoint: `https://[PROJECT_ID].supabase.co/functions/v1/stripe-webhook`
    - Events: `checkout.session.completed`, `customer.subscription.deleted`, `customer.subscription.updated`
 
-5. Set up Stripe secret in Supabase PostgresSQL vault. Go into your Supabase dashboard, to go **SQL Editor** then run this command (replacing your secret key):
-
-```sql
-insert into vault.secrets (name, secret)
-select 'stripe', 'sk_test_xxx'
-returning key_id;
-```
-
-or by updating it:
-
-```sql
-update vault.secrets
-    set secret = 'your-new-stripe-secret-key'
-    where name = 'stripe'
-    returning key_id;
-```
+5. **Store Stripe secrets using Supabase CLI**:
+   ```bash
+   # Store Stripe secrets (these will be available to Edge Functions via Deno.env.get())
+   supabase secrets set STRIPE_SECRET_KEY=your-stripe-secret-key
+   supabase secrets set STRIPE_PRICE_ID=your-stripe-price-id
+   supabase secrets set STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
+   
+   # Verify secrets are stored
+   supabase secrets list
+   ```
+   
+   **Note**: Stripe customers are now created on-demand when users subscribe, not during registration. This eliminates the need for vault.secrets table and avoids permission issues.
 ### Required Environment Variables
 
 Add to `.env.local` and `.env.test.local`:
@@ -173,6 +169,22 @@ supabase secrets set OPENAI_API_KEY="sk-xxx..."
 supabase secrets set STRIPE_SECRET_KEY=sk_test_xxx
 supabase secrets set STRIPE_PRICE_ID=price_xxx
 supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_xxx
+```
+
+### Clean up unnecessary Supabase secrets (Security Best Practice)
+
+```bash
+# Remove potentially risky secrets that shouldn't be in Edge Functions
+supabase secrets unset SUPABASE_SERVICE_ROLE_KEY  # Major security risk
+supabase secrets unset SUPABASE_DB_URL           # Not needed by Edge Functions
+supabase secrets unset SUPABASE_ANON_KEY         # Available via environment
+supabase secrets unset SUPABASE_URL              # Available via environment
+
+# Keep only these secrets for Edge Functions:
+# - STRIPE_SECRET_KEY
+# - STRIPE_PRICE_ID  
+# - STRIPE_WEBHOOK_SECRET
+# - OPENAI_API_KEY (for AI features)
 ```
 
 ### Running Tests
