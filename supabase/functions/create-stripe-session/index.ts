@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     // First try to get the profile
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("stripe_customer_id, subscription_plan")
+      .select("stripe_customer_id, subscription_plan, full_name")
       .eq("user_id", user.id)
       .single();
 
@@ -65,9 +65,32 @@ Deno.serve(async (req) => {
       throw new Error("No profile found");
     }
 
-    console.log(`🔎 Found profile: ${profile}`);
-    if (!profile?.stripe_customer_id) {
-      throw new Error("No Stripe customer found");
+    console.log(`🔎 Found profile: ${JSON.stringify(profile)}`);
+    
+    let customerId = profile.stripe_customer_id;
+
+    // Create Stripe customer on-demand if not exists
+    if (!customerId) {
+      console.log("🔄 Creating new Stripe customer...");
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: profile.full_name || user.email,
+        description: `Customer for ${user.email}`,
+      });
+
+      customerId = customer.id;
+      console.log(`✅ Created Stripe customer: ${customerId}`);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ stripe_customer_id: customerId })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        console.error("❌ Failed to update profile:", updateError);
+        throw new Error(`Failed to update profile: ${updateError.message}`);
+      }
+      console.log("✅ Updated profile with Stripe customer ID");
     }
 
     const originUrl = req.headers.get("origin") ?? "http://localhost:3000";
@@ -75,7 +98,7 @@ Deno.serve(async (req) => {
     // Create Portal session if already subscribed
     if (profile.subscription_plan === "premium") {
       const session = await stripe.billingPortal.sessions.create({
-        customer: profile.stripe_customer_id,
+        customer: customerId,
         return_url: `${originUrl}/profile`,
       });
       return new Response(JSON.stringify({ url: session.url }), {
@@ -85,7 +108,7 @@ Deno.serve(async (req) => {
 
     // Create Checkout session for new subscribers
     const session = await stripe.checkout.sessions.create({
-      customer: profile.stripe_customer_id,
+      customer: customerId,
       line_items: [
         {
           price: STRIPE_PRICE_ID,
