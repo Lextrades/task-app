@@ -64,6 +64,7 @@ At this stage, it won't work well yet because we haven't set up the backend.
 ### Supabase Setup
 
 1. Create new Supabase project at supabase.com
+  - Enable Datebase -> Extensions -> `pgsodium`
 
 2. Link project:
 ```bash
