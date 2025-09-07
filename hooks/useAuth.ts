@@ -24,6 +24,7 @@ export function useAuth(): UseAuthReturn {
 
   const fetchUserProfile = async (userId: string, userEmail: string) => {
     try {
+      console.log("Fetching profile for user:", userId);
       const [profileResponse, usageResponse] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", userId).single(),
         supabase
@@ -34,13 +35,20 @@ export function useAuth(): UseAuthReturn {
           .maybeSingle(),
       ]);
 
-      if (profileResponse.error) throw profileResponse.error;
+      console.log("Profile response:", profileResponse);
+      console.log("Usage response:", usageResponse);
+
+      if (profileResponse.error) {
+        console.error("Profile fetch error:", profileResponse.error);
+        throw profileResponse.error;
+      }
 
       setUser({
         ...profileResponse.data,
         email: userEmail,
         tasks_created: usageResponse.data?.tasks_created || 0,
       });
+      console.log("User profile set successfully");
     } catch (error) {
       console.error("Critical error fetching user profile:", error);
       await signOut();
@@ -50,13 +58,16 @@ export function useAuth(): UseAuthReturn {
   };
 
   const updateSessionState = async (newSession: any) => {
+    console.log("Updating session state:", newSession);
     setSession(newSession);
     setIsLoggedIn(!!newSession);
 
     if (newSession?.user) {
+      console.log("Session has user, fetching profile:", newSession.user);
       setIsLoading(true);
       await fetchUserProfile(newSession.user.id, newSession.user.email);
     } else {
+      console.log("No user in session, clearing user state");
       setUser(null);
       setIsLoading(false);
     }
@@ -111,20 +122,25 @@ export function useAuth(): UseAuthReturn {
   const handleSignup = async () => {
     clearError();
     try {
-      const { error } = await supabase.auth.signUp({
+      console.log("Starting signup process for:", email);
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: `${window.location.origin}/` },
       });
 
+      console.log("Signup response:", { data, error });
+
       if (error) {
+        console.error("Signup error details:", error);
         setError(error.message);
       } else {
+        console.log("Signup successful, user:", data.user);
         setError("Please check your email to confirm your account");
       }
     } catch (error: any) {
-      setError(error.message);
-      console.error("Error signing up:", error);
+      console.error("Critical signup error:", error);
+      setError("Database error saving new user");
     }
   };
 

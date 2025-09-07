@@ -7,7 +7,7 @@ set search_path = public
 as $$
 begin
   insert into public.profiles (user_id, name)
-  values (new.id, new.raw_user_meta_data->>'name');
+  values (new.id, coalesce(new.raw_user_meta_data->>'name', new.email));
   return new;
 end;
 $$ language plpgsql;
@@ -21,6 +21,11 @@ create trigger on_auth_user_created
 create policy "Users can read own profile"
 on public.profiles for select
 using (auth.uid() = user_id);
+
+-- Security policy: Allow profile creation for new users
+create policy "Allow profile creation for new users"
+on public.profiles for insert
+with check (auth.uid() = user_id);
 
 -- Security policy: Users can CRUD their own tasks
 create policy "Users can CRUD own tasks"

@@ -171,21 +171,6 @@ supabase secrets set STRIPE_PRICE_ID=price_xxx
 supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_xxx
 ```
 
-### Clean up unnecessary Supabase secrets (Security Best Practice)
-
-```bash
-# Remove potentially risky secrets that shouldn't be in Edge Functions
-supabase secrets unset SUPABASE_SERVICE_ROLE_KEY  # Major security risk
-supabase secrets unset SUPABASE_DB_URL           # Not needed by Edge Functions
-supabase secrets unset SUPABASE_ANON_KEY         # Available via environment
-supabase secrets unset SUPABASE_URL              # Available via environment
-
-# Keep only these secrets for Edge Functions:
-# - STRIPE_SECRET_KEY
-# - STRIPE_PRICE_ID  
-# - STRIPE_WEBHOOK_SECRET
-# - OPENAI_API_KEY (for AI features)
-```
 
 ### Running Tests
 
